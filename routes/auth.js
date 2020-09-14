@@ -5,12 +5,6 @@ var fs = require('fs')
 var sanitizeHtml = require('sanitize-html')
 var template = require('../lib/template.js')
 
-var authData = {
-    email:'jeanfree1@naver.com',
-    password:'111111',
-    nickname:'jjing9'
-}
-
 router.get('/login',function(request,response){
     var title = 'WEB - login';
     var list = template.list(request.list);
@@ -24,19 +18,19 @@ router.get('/login',function(request,response){
     response.send(html);
 });
 
-router.post('/login_process',function(request,response){
-    var post = request.body;
-    var email = post.email;
-    var pwd = post.pwd;
-    if(email === authData.email && pwd === authData.password) {
-        request.session.is_logined = true;
-        request.session.nickname = authData.nickname;
-        request.session.save(function(){
-            response.redirect('/');
-        }); //세션객체의 값을 세션스토어의 바로 저장한다.
-    }
-    else response.send('Who');
-});
+// router.post('/login_process',function(request,response){
+//     var post = request.body;
+//     var email = post.email;
+//     var pwd = post.pwd;
+//     if(email === authData.email && pwd === authData.password) {
+//         request.session.is_logined = true;
+//         request.session.nickname = authData.nickname;
+//         request.session.save(function(){
+//             response.redirect('/');
+//         }); //세션객체의 값을 세션스토어의 바로 저장한다.
+//     }
+//     else response.send('Who');
+// });
 
 router.get('/logout',function(request,response){
     request.session.destroy(function(err){

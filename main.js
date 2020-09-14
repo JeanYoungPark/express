@@ -5,6 +5,7 @@ var bodyParse = require('body-parser')
 var compression = require('compression')
 var session = require('express-session')
 var FileStore = require('session-file-store')(session)
+
 var helmet = require('helmet');
 app.use(helmet());
 
@@ -17,6 +18,42 @@ app.use(session({
   saveUninitialized: true,
   store:new FileStore()
 }))
+
+var authData = {
+  email:'jeanfree1@naver.com',
+  password:'111111',
+  nickname:'jjing9'
+}
+
+var passport = require('passport')
+var LocalStrategy = require('passport-local').Strategy;
+ 
+passport.use(new LocalStrategy({
+    usernameField:'email',
+    passwordField:'pwd'
+  },
+  function(username, password, done){
+    if(username === authData.email){
+      if(password === authData.password){
+        return done(null,authData);
+      }else {
+        return done(null,false,{
+          message : 'Incorrect password.'
+        });
+      }
+    }else {
+      return done(null,false, {
+        message : 'Incorrect username.'
+      });
+    }
+  })
+);
+
+app.post('/auth/login_process',
+  passport.authenticate('local',{
+    successRedirect:'/',
+    failureRedirect:'/auth/login'
+}));
 
 app.get('*',function(request,response,next){ //app which use get
   fs.readdir('./data', function(error, filelist){
