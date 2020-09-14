@@ -3,12 +3,21 @@ const app = express()
 var fs = require('fs')
 var bodyParse = require('body-parser')
 var compression = require('compression')
+var session = require('express-session')
+var FileStore = require('session-file-store')(session)
 var helmet = require('helmet');
 app.use(helmet());
 
 app.use(express.static('public'));
 app.use(bodyParse.urlencoded({extended:false})); //body parsing..
 app.use(compression());
+app.use(session({
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: true,
+  store:new FileStore()
+}))
+
 app.get('*',function(request,response,next){ //app which use get
   fs.readdir('./data', function(error, filelist){
     request.list = filelist; //can every route , request's list == filelist
