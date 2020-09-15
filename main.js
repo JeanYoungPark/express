@@ -5,6 +5,7 @@ var bodyParse = require('body-parser')
 var compression = require('compression')
 var session = require('express-session')
 var FileStore = require('session-file-store')(session)
+var flash = require('connect-flash')
 
 var helmet = require('helmet');
 app.use(helmet());
@@ -19,6 +20,8 @@ app.use(session({
   store:new FileStore()
 }))
 
+app.use(flash());
+
 var authData = {
   email:'jeanfree1@naver.com',
   password:'111111',
@@ -27,7 +30,16 @@ var authData = {
 
 var passport = require('passport')
 var LocalStrategy = require('passport-local').Strategy;
- 
+app.use(passport.initialize()); 
+app.use(passport.session()); 
+
+passport.serializeUser(function(user,done){
+  done(null,user.email);
+});
+passport.deserializeUser(function(user,done){
+  done(null,authData);
+});
+
 passport.use(new LocalStrategy({
     usernameField:'email',
     passwordField:'pwd'
@@ -35,7 +47,9 @@ passport.use(new LocalStrategy({
   function(username, password, done){
     if(username === authData.email){
       if(password === authData.password){
-        return done(null,authData);
+        return done(null,authData,{
+          message : 'Welcome.'
+        });
       }else {
         return done(null,false,{
           message : 'Incorrect password.'
@@ -52,7 +66,9 @@ passport.use(new LocalStrategy({
 app.post('/auth/login_process',
   passport.authenticate('local',{
     successRedirect:'/',
-    failureRedirect:'/auth/login'
+    failureRedirect:'/auth/login',
+    failureFlash:true,
+    successFlash:true
 }));
 
 app.get('*',function(request,response,next){ //app which use get
@@ -65,6 +81,7 @@ app.get('*',function(request,response,next){ //app which use get
 var indexRouter = require('./routes/index');
 var topicRouter = require('./routes/topic');
 var authRouter = require('./routes/auth');
+const { request, response } = require('express')
 
 app.use('/',indexRouter);
 app.use('/topic',topicRouter);

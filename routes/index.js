@@ -4,11 +4,15 @@ var template = require('../lib/template.js')
 var auth = require('../lib/auth')
 
 router.get('/',function(request,response){
+  var fmsg = request.flash();
+  var feedback = '';
+  if(fmsg.success) feedback = fmsg.success[0];
   var title = 'Welcome';
   var description = 'Hello, Node.js';
   var list = template.list(request.list);
   var html = template.HTML(title, list,
   `
+  <div style="color:blue;">${feedback}</div>
   <h2>${title}</h2>${description}
   <img src="/images/hello.jpg" style="display:block;width:300px;margin-top:10px">
   `,
@@ -16,5 +20,5 @@ router.get('/',function(request,response){
   );
   response.send(html);
 }) ;
-
+ 
 module.exports = router;
