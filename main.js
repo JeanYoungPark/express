@@ -18,58 +18,10 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   store:new FileStore()
-}))
+}));
 
 app.use(flash());
-
-var authData = {
-  email:'jeanfree1@naver.com',
-  password:'111111',
-  nickname:'jjing9'
-}
-
-var passport = require('passport')
-var LocalStrategy = require('passport-local').Strategy;
-app.use(passport.initialize()); 
-app.use(passport.session()); 
-
-passport.serializeUser(function(user,done){
-  done(null,user.email);
-});
-passport.deserializeUser(function(user,done){
-  done(null,authData);
-});
-
-passport.use(new LocalStrategy({
-    usernameField:'email',
-    passwordField:'pwd'
-  },
-  function(username, password, done){
-    if(username === authData.email){
-      if(password === authData.password){
-        return done(null,authData,{
-          message : 'Welcome.'
-        });
-      }else {
-        return done(null,false,{
-          message : 'Incorrect password.'
-        });
-      }
-    }else {
-      return done(null,false, {
-        message : 'Incorrect username.'
-      });
-    }
-  })
-);
-
-app.post('/auth/login_process',
-  passport.authenticate('local',{
-    successRedirect:'/',
-    failureRedirect:'/auth/login',
-    failureFlash:true,
-    successFlash:true
-}));
+var passport = require('./lib/passport')(app);
 
 app.get('*',function(request,response,next){ //app which use get
   fs.readdir('./data', function(error, filelist){
@@ -80,7 +32,7 @@ app.get('*',function(request,response,next){ //app which use get
 
 var indexRouter = require('./routes/index');
 var topicRouter = require('./routes/topic');
-var authRouter = require('./routes/auth');
+var authRouter = require('./routes/auth')(passport);
 const { request, response } = require('express')
 
 app.use('/',indexRouter);
